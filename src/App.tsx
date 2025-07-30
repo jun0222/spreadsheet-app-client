@@ -51,7 +51,9 @@ const submitToSpreadsheet = async (text: string) => {
   try {
     const response = await fetch(GAS_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8", // application/json だとcors対応できないgasの仕様対応: https://qiita.com/taiyo914/items/724947f8042e3f68293e
+      },
       body: JSON.stringify({ text }),
     });
     if (!response.ok) {
