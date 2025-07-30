@@ -3,7 +3,7 @@ import "./App.css";
 
 const PAGE_SIZE = 10;
 const USE_SPREAD_SHEET_MOCK =
-  import.meta.env.ENV === "production" ? false : true;
+  import.meta.env.VITE_ENV === "production" ? false : true;
 
 const mockData = [
   "モック投稿1",
