@@ -23,51 +23,34 @@ const GAS_ENDPOINT = import.meta.env.VITE_GAS_ENDPOINT;
 
 const fetchFromSpreadsheet = async () => {
   if (!GAS_ENDPOINT) {
-    console.warn(
-      "Warning: GAS_ENDPOINT is not defined. Fetch and submit operations will fail."
-    );
+    console.warn("Warning: GAS_ENDPOINT is not defined.");
   }
 
   try {
     const res = await fetch(GAS_ENDPOINT);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
-    }
-    const data = await res.json();
-    return data;
+    if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
+    return await res.json();
   } catch (error) {
-    console.error("Error fetching data from spreadsheet:", error);
+    console.error("Fetch error:", error);
     return [];
   }
 };
 
 const submitToSpreadsheet = async (text: string) => {
-  if (!GAS_ENDPOINT) {
-    throw new Error(
-      "GAS_ENDPOINT is not defined. Cannot submit data to the spreadsheet."
-    );
-  }
+  if (!GAS_ENDPOINT) throw new Error("GAS_ENDPOINT is undefined");
 
   try {
-    const response = await fetch(GAS_ENDPOINT, {
+    const res = await fetch(GAS_ENDPOINT, {
       method: "POST",
       headers: {
-        "Content-Type": "text/plain;charset=utf-8", // application/json だとcors対応できないgasの仕様対応: https://qiita.com/taiyo914/items/724947f8042e3f68293e
+        "Content-Type": "text/plain;charset=utf-8",
       },
       body: JSON.stringify({ text }),
     });
-    if (!response.ok) {
-      console.error(
-        `Failed to submit: ${response.status} ${response.statusText}`
-      );
-      throw new Error("Failed to submit data to the spreadsheet.");
-    }
+    if (!res.ok) throw new Error(`Submit failed: ${res.status}`);
   } catch (error) {
-    console.error(
-      "An error occurred while submitting to the spreadsheet:",
-      error
-    );
-    throw error; // Re-throw the error to allow further handling if needed
+    console.error("Submit error:", error);
+    throw error;
   }
 };
 
@@ -75,30 +58,35 @@ export default function PostClient() {
   const [posts, setPosts] = useState<string[]>([]);
   const [text, setText] = useState("");
   const [page, setPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchPosts = async () => {
+      setIsLoading(true);
       const data = USE_SPREAD_SHEET_MOCK
         ? [...mockData].reverse()
         : await fetchFromSpreadsheet();
       setPosts(data);
+      setIsLoading(false);
     };
     fetchPosts();
   }, []);
 
   const handleSubmit = async () => {
     if (!text.trim()) return alert("投稿内容を入力してください。");
-    if (USE_SPREAD_SHEET_MOCK) {
-      const newMockData = [...mockData, text];
-      setPosts([...newMockData].reverse());
-    } else {
-      await submitToSpreadsheet(text);
-    }
+
+    // 先にUIへ反映
+    const newPosts = [text, ...posts];
+    setPosts(newPosts);
     setText("");
-    const data = USE_SPREAD_SHEET_MOCK
-      ? [...mockData].reverse()
-      : await fetchFromSpreadsheet();
-    setPosts(data);
+
+    try {
+      if (!USE_SPREAD_SHEET_MOCK) {
+        await submitToSpreadsheet(text);
+      }
+    } catch (error: unknown) {
+      console.error("投稿エラー:", error);
+    }
   };
 
   const start = page * PAGE_SIZE;
@@ -121,12 +109,22 @@ export default function PostClient() {
         投稿
       </button>
 
-      <div className="mt-6 space-y-4">
-        {pagePosts.map((p, i) => (
-          <div key={`${p}-${i}`} className="border-b pb-2 whitespace-pre-wrap">
-            {p}
-          </div>
-        ))}
+      <div className="mt-6 space-y-4 min-h-[240px]">
+        {isLoading
+          ? [...Array(PAGE_SIZE)].map((_, i) => (
+              <div
+                key={i}
+                className="h-6 bg-gray-300 animate-pulse rounded-sm"
+              />
+            ))
+          : pagePosts.map((p, i) => (
+              <div
+                key={`${p}-${i}`}
+                className="border-b pb-2 whitespace-pre-wrap"
+              >
+                {p}
+              </div>
+            ))}
       </div>
 
       <div className="flex justify-between items-center mt-6">
