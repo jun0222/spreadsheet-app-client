@@ -28,9 +28,17 @@ const fetchFromSpreadsheet = async () => {
     );
   }
 
-  const res = await fetch(GAS_ENDPOINT);
-  const data = await res.json();
-  return data.reverse();
+  try {
+    const res = await fetch(GAS_ENDPOINT);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    return data.reverse();
+  } catch (error) {
+    console.error("Error fetching data from spreadsheet:", error);
+    return [];
+  }
 };
 
 const submitToSpreadsheet = async (text: string) => {
@@ -40,11 +48,25 @@ const submitToSpreadsheet = async (text: string) => {
     );
   }
 
-  await fetch(GAS_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
-  });
+  try {
+    const response = await fetch(GAS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) {
+      console.error(
+        `Failed to submit: ${response.status} ${response.statusText}`
+      );
+      throw new Error("Failed to submit data to the spreadsheet.");
+    }
+  } catch (error) {
+    console.error(
+      "An error occurred while submitting to the spreadsheet:",
+      error
+    );
+    throw error; // Re-throw the error to allow further handling if needed
+  }
 };
 
 export default function PostClient() {
@@ -65,7 +87,8 @@ export default function PostClient() {
   const handleSubmit = async () => {
     if (!text.trim()) return alert("投稿内容を入力してください。");
     if (USE_SPREAD_SHEET_MOCK) {
-      mockData.push(text);
+      const newMockData = [...mockData, text];
+      setPosts([...newMockData].reverse());
     } else {
       await submitToSpreadsheet(text);
     }
@@ -98,7 +121,7 @@ export default function PostClient() {
 
       <div className="mt-6 space-y-4">
         {pagePosts.map((p, i) => (
-          <div key={i} className="border-b pb-2 whitespace-pre-wrap">
+          <div key={`${p}-${i}`} className="border-b pb-2 whitespace-pre-wrap">
             {p}
           </div>
         ))}
