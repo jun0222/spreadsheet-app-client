@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 const PAGE_SIZE = 10;
-const USE_SPREAD_SHEET_MOCK = import.meta.env.PROD ? false : true;
+const USE_SPREAD_SHEET_MOCK =
+  import.meta.env.ENV === "production" ? false : true;
 
 const mockData = [
   "モック投稿1",
@@ -18,27 +19,20 @@ const mockData = [
   "モック投稿11",
 ];
 
-const SPREAD_SHEET_API_KEY = import.meta.env.VITE_SPREAD_SHEET_API_KEY;
-const SPREAD_SHEET_SHEET_ID = import.meta.env.VITE_SPREAD_SHEET_SHEET_ID;
-const RANGE = "A1:A";
+const GAS_ENDPOINT = import.meta.env.VITE_GAS_ENDPOINT;
 
 const fetchFromSpreadsheet = async () => {
-  const res = await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${SPREAD_SHEET_SHEET_ID}/values/${RANGE}?key=${SPREAD_SHEET_API_KEY}`
-  );
+  const res = await fetch(GAS_ENDPOINT);
   const data = await res.json();
-  return (data.values || []).map((r: string[]) => r[0]).reverse();
+  return data.reverse();
 };
 
 const submitToSpreadsheet = async (text: string) => {
-  await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${SPREAD_SHEET_SHEET_ID}/values/A1:append?valueInputOption=RAW&key=${SPREAD_SHEET_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ values: [[text]] }),
-    }
-  );
+  await fetch(GAS_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
 };
 
 export default function PostClient() {
@@ -76,7 +70,7 @@ export default function PostClient() {
 
   return (
     <div className="max-w-xl mx-auto p-4 font-sans">
-      <h1 className="text-2xl font-bold mb-4">投稿クライアント</h1>
+      <h1 className="text-2xl font-bold mb-4">テキストシェアツール</h1>
       <textarea
         className="w-full h-24 border p-2 mb-2"
         value={text}
