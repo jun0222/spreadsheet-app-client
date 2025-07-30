@@ -1,6 +1,6 @@
 // === 設定 ===
-const SHEET_ID = "シートのIDを入れる";
-const SHEET_NAME = "シート名を入れる";
+const SHEET_ID = "***REMOVED***";
+const SHEET_NAME = "posts";
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
@@ -16,8 +16,16 @@ function doPost(e) {
 
 function doGet(e) {
   const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
-  const values = sheet.getDataRange().getValues();
-  const texts = values.slice(1).map((row) => row[0]); // 1行目を除外して1列目（投稿）だけ抽出
+
+  const lastRow = sheet.getLastRow();
+  const limit = e?.parameter?.limit ? parseInt(e.parameter.limit, 10) : 10;
+  const safeLimit = Math.max(1, Math.min(lastRow - 1, limit)); // ヘッダー分除く
+
+  // TODO: クエリパラメータで limit を指定できるようにする。現状はデフォルトの10件のみ取得
+  const startRow = Math.max(2, lastRow - safeLimit + 1);
+  const range = sheet.getRange(startRow, 1, safeLimit, 1);
+  const values = range.getValues();
+  const texts = values.map((row) => row[0]).reverse(); // 最新が先頭
 
   return ContentService.createTextOutput(JSON.stringify(texts)).setMimeType(
     ContentService.MimeType.JSON
