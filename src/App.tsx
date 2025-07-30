@@ -22,12 +22,24 @@ const mockData = [
 const GAS_ENDPOINT = import.meta.env.VITE_GAS_ENDPOINT;
 
 const fetchFromSpreadsheet = async () => {
+  if (!GAS_ENDPOINT) {
+    console.warn(
+      "Warning: GAS_ENDPOINT is not defined. Fetch and submit operations will fail."
+    );
+  }
+
   const res = await fetch(GAS_ENDPOINT);
   const data = await res.json();
   return data.reverse();
 };
 
 const submitToSpreadsheet = async (text: string) => {
+  if (!GAS_ENDPOINT) {
+    throw new Error(
+      "GAS_ENDPOINT is not defined. Cannot submit data to the spreadsheet."
+    );
+  }
+
   await fetch(GAS_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -36,7 +48,7 @@ const submitToSpreadsheet = async (text: string) => {
 };
 
 export default function PostClient() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<string[]>([]);
   const [text, setText] = useState("");
   const [page, setPage] = useState(0);
 
