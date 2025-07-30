@@ -34,7 +34,7 @@ const fetchFromSpreadsheet = async () => {
       throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
     }
     const data = await res.json();
-    return data.reverse();
+    return data;
   } catch (error) {
     console.error("Error fetching data from spreadsheet:", error);
     return [];
