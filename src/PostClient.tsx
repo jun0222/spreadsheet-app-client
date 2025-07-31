@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import { getIdToken } from "firebase/auth";
+import { auth } from "./firebase";
 
 const PAGE_SIZE = 10;
 const USE_SPREAD_SHEET_MOCK =
@@ -39,12 +41,19 @@ const fetchFromSpreadsheet = async () => {
 const submitToSpreadsheet = async (text: string) => {
   if (!GAS_ENDPOINT) throw new Error("GAS_ENDPOINT is undefined");
 
+  // Firebaseのユーザー情報を取得
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("未ログインです");
+  }
+
+  // ユーザーのIDトークンを取得
+  const idToken = await getIdToken(user);
+
   try {
-    const res = await fetch(GAS_ENDPOINT, {
+    const res = await fetch(`${GAS_ENDPOINT}?idToken=${idToken}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ text }),
     });
     if (!res.ok) throw new Error(`Submit failed: ${res.status}`);

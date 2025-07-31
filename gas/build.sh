@@ -2,8 +2,8 @@
 
 # 置き換える環境変数
 # 必須環境変数のチェック
-if [ -z "$GAS_SHEET_ID" ] || [ -z "$GAS_SHEET_NAME" ]; then
-  echo "❌ GAS_SHEET_ID または GAS_SHEET_NAME が未設定です。"
+if [ -z "$GAS_SHEET_ID" ] || [ -z "$GAS_SHEET_NAME" ] || [ -z "$GAS_ALLOWED_UID" ] || [ -z "$GAS_FIREBASE_API_KEY" ]; then
+  echo "❌ 必須環境変数が未設定です。"
   exit 1
 fi
 
@@ -16,6 +16,8 @@ OUTPUT_FILE="gas/dist/text-share-app-backend.js"
 sed \
   -e "s|{{GAS_SHEET_ID}}|$GAS_SHEET_ID|g" \
   -e "s|{{GAS_SHEET_NAME}}|$GAS_SHEET_NAME|g" \
+  -e "s|{{GAS_ALLOWED_UID}}|$GAS_ALLOWED_UID|g" \
+  -e "s|{{GAS_FIREBASE_API_KEY}}|$GAS_FIREBASE_API_KEY|g" \
   "$INPUT_FILE" > "$OUTPUT_FILE"
 
 echo "✅ 環境変数を置き換えました: $OUTPUT_FILE"

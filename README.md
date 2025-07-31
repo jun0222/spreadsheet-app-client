@@ -7,5 +7,5 @@ VITE_ENV=production VITE_GAS_ENDPOINT=最新のgasエンドポイント npm run 
 ## gas のコードをビルドする
 
 ```bash
-GAS_SHEET_ID=GASのシートID GAS_SHEET_NAME=GASのシート名 GAS_ALLOWED_UID=GASへのアクセス許可するユーザーのUID sh gas/build.sh
+GAS_SHEET_ID=GASのシートID GAS_SHEET_NAME=GASのシート名 GAS_ALLOWED_UID=GASへのアクセス許可するユーザーのUID GAS_FIREBASE_API_KEY=firebaseのapiキー sh gas/build.sh
 ```

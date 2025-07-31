@@ -1,8 +1,30 @@
 // === 設定 ===
 const GAS_SHEET_ID = "{{GAS_SHEET_ID}}";
 const GAS_SHEET_NAME = "{{GAS_SHEET_NAME}}";
+const GAS_ALLOWED_UID = "{{GAS_ALLOWED_UID}}";
+const FIREBASE_TOKEN_URL = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={{GAS_FIREBASE_API_KEY}}`;
+
+function getUidFromIdToken(idToken) {
+  try {
+    const response = UrlFetchApp.fetch(FIREBASE_TOKEN_URL, {
+      method: "post",
+      contentType: "text/plain;charset=utf-8",
+      payload: JSON.stringify({ idToken }),
+    });
+    const json = JSON.parse(response.getContentText());
+    return json.users?.[0]?.localId || null;
+  } catch (err) {
+    return null;
+  }
+}
 
 function doPost(e) {
+  const idToken = e?.parameter?.idToken || "";
+  const uid = getUidFromIdToken(idToken);
+  if (uid !== GAS_ALLOWED_UID) {
+    return ContentService.createTextOutput("unauthorized");
+  }
+
   const data = JSON.parse(e.postData.contents);
   const text = data.text;
 
