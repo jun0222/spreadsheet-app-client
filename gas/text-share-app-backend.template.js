@@ -1,12 +1,13 @@
 // === 設定 ===
-const SHEET_ID = "";
-const SHEET_NAME = "";
+const GAS_SHEET_ID = "{{GAS_SHEET_ID}}";
+const GAS_SHEET_NAME = "{{GAS_SHEET_NAME}}";
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
   const text = data.text;
 
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  const sheet =
+    SpreadsheetApp.openById(GAS_SHEET_ID).getSheetByName(GAS_SHEET_NAME);
   sheet.appendRow([text, new Date()]);
 
   return ContentService.createTextOutput(
@@ -15,7 +16,8 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  const sheet =
+    SpreadsheetApp.openById(GAS_SHEET_ID).getSheetByName(GAS_SHEET_NAME);
 
   const lastRow = sheet.getLastRow();
   const limit = e?.parameter?.limit ? parseInt(e.parameter.limit, 10) : 10;
