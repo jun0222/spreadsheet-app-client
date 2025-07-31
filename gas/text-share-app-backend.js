@@ -1,6 +1,6 @@
 // === 設定 ===
-const SHEET_ID = "***REMOVED***";
-const SHEET_NAME = "posts";
+const SHEET_ID = "";
+const SHEET_NAME = "";
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
