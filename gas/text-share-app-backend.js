@@ -1,6 +1,6 @@
 // === 設定 ===
-const SHEET_ID = "1T2Lfm0yd_6pJ1drxLr2k_T5hzGO-pB-KbAmadk8m_Tg";
-const SHEET_NAME = "posts";
+const SHEET_ID = "";
+const SHEET_NAME = "";
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
