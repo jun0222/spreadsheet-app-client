@@ -98,6 +98,21 @@ export default function PostClient() {
     }
   };
 
+  const handleCopy = (e: React.MouseEvent<HTMLSpanElement>) => {
+    const textToCopy = e.currentTarget.textContent;
+    if (!textToCopy) return;
+
+    navigator.clipboard.writeText(textToCopy).then(
+      () => {
+        alert("コピーしました: " + textToCopy);
+      },
+      (err) => {
+        console.error("コピー失敗:", err);
+        alert("コピーに失敗しました。");
+      }
+    );
+  };
+
   const start = page * PAGE_SIZE;
   const pagePosts = posts.slice(start, start + PAGE_SIZE);
   const totalPages = Math.ceil(posts.length / PAGE_SIZE);
@@ -130,6 +145,9 @@ export default function PostClient() {
               <div
                 key={`${p}-${i}`}
                 className="border-b pb-2 whitespace-pre-wrap"
+                onClick={handleCopy}
+                style={{ cursor: "pointer", textDecoration: "underline" }}
+                title="クリックでコピー"
               >
                 {p}
               </div>
